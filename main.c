@@ -59,8 +59,33 @@ static void UpdateBall(Ball *ball, Paddle paddle, Brick bricks[], int *score, in
     }
 }
 
+static void DrawGame(Paddle paddle, Ball ball, Brick bricks[], int *score, int *lives) {
+    DrawRectangle(paddle.position.x, paddle.position.y, paddle.width, paddle.height, DARKGRAY);
+
+    DrawCircle(ball.position.x, ball.position.y, ball.radius, BLUE);
+
+    for (int i = 0; i < MAX_BRICKS; i++) {
+        if (bricks[i].active) {
+            DrawRectangleRec(bricks[i].rect, RED);
+        }
+    }
+    DrawText(TextFormat("Score: %i", score), 10, 10, 20, WHITE);
+    DrawText(TextFormat("Lives: %i", *lives), 10, 40, 20, WHITE);
+}
+
+
+
 int main() {
     InitWindow(800, 600, "ArkanoidCopy");
+
+    Paddle paddle = { .position = { 400, 570 }, .width = 100, .height = 20 };
+    Ball ball = { .position = { 400, 300 }, .speed = { 200.0f, -200.0f }, .radius = 10 };
+
+    Brick bricks[MAX_BRICKS];
+    for (int i = 0; i < MAX_BRICKS; i++) {
+        bricks[i].rect = (Rectangle){ 50 + (i % 10) * 70, 50 + (i / 10) * 30, 60, 20 };
+        bricks[i].active = true;
+    }
 
 
     int score = 0;

@@ -4,6 +4,8 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#define RAYMATH_IMPLEMENTATION
+#define RAYMATH_STATIC_INLINE
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 #define PADDLE_WIDTH 80
@@ -33,7 +35,7 @@ typedef struct Brick {
 typedef struct PowerUp {
     Vector2 position;
     bool isActive;
-    float speed;  
+    float speed;  // Power-up fall speed
 } PowerUp;
 
 // Game variables
@@ -104,13 +106,12 @@ void UpdateGame()
 {
     // Move paddle with left and right arrow keys
     if (IsKeyDown(KEY_RIGHT) && paddle.position.x + PADDLE_WIDTH < SCREEN_WIDTH)
-        paddle.position.x += 8.0f;  // Move right
+        paddle.position = Vector2Add(paddle.position, (Vector2){8.0f, 0});  // Move right
     if (IsKeyDown(KEY_LEFT) && paddle.position.x > 0)
-        paddle.position.x -= 8.0f;  // Move left
+        paddle.position = Vector2Add(paddle.position, (Vector2){-8.0f, 0});  // Move left
 
-    // Update ball position directly by adding speed
-    ball.position.x += ball.speed.x;
-    ball.position.y += ball.speed.y;
+    // Update ball position using raymath
+    ball.position = Vector2Add(ball.position, ball.speed);
 
     // Ball-wall collision (left, right, top walls)
     if (ball.position.x - BALL_RADIUS <= 0 || ball.position.x + BALL_RADIUS >= SCREEN_WIDTH)

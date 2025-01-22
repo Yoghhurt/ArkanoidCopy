@@ -13,8 +13,6 @@
 #define BRICK_HEIGHT 20
 #define BRICKS_PER_ROW 10
 #define NUM_ROWS 5
-
-// Game constants
 #define MAX_LIVES 3
 
 // Structs
@@ -32,10 +30,17 @@ typedef struct Brick {
     bool isActive;
 } Brick;
 
+typedef struct PowerUp {
+    Vector2 position;
+    bool isActive;
+    float speed;  
+} PowerUp;
+
 // Game variables
 Ball ball;
 Paddle paddle;
 Brick bricks[NUM_ROWS * BRICKS_PER_ROW];
+PowerUp powerUp;
 int lives = MAX_LIVES;
 int score = 0;
 bool gameOver = false;
@@ -46,10 +51,12 @@ void UpdateGame();
 void DrawGame();
 void ResetBall();
 void ResetBricks();
+void ResetPowerUp();
 void CheckCollisions();
 void RestartGame();
 void DrawUI();
 bool CheckBrickCollision(Rectangle rect);
+void DrawPowerUp();
 
 int main(void)
 {
@@ -84,12 +91,13 @@ int main(void)
 
 void InitializeGame()
 {
-    // Set initial positions using raymath
+    // Set initial positions
     paddle.position = (Vector2){SCREEN_WIDTH / 2 - PADDLE_WIDTH / 2, SCREEN_HEIGHT - PADDLE_HEIGHT - 20};
     ball.position = (Vector2){SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
     ball.speed = (Vector2){5.0f, -5.0f};  // Initial ball speed
 
     ResetBricks();
+    ResetPowerUp();
 }
 
 void UpdateGame()
@@ -100,6 +108,7 @@ void UpdateGame()
     if (IsKeyDown(KEY_LEFT) && paddle.position.x > 0)
         paddle.position.x -= 8.0f;  // Move left
 
+    // Update ball position directly by adding speed
     ball.position.x += ball.speed.x;
     ball.position.y += ball.speed.y;
 
@@ -134,6 +143,25 @@ void UpdateGame()
 
     // Ball-brick collision
     CheckCollisions();
+
+    // Power-up movement
+    if (powerUp.isActive)
+    {
+        powerUp.position.y += powerUp.speed;  // Move power-up down
+
+        // Check for ball-powerup collision
+        if (CheckCollisionCircleRec(ball.position, BALL_RADIUS, (Rectangle){powerUp.position.x, powerUp.position.y, 20, 20}))
+        {
+            lives++;  // Grant extra life
+            powerUp.isActive = false;  // Deactivate power-up
+        }
+
+        // If power-up goes off the screen, deactivate it
+        if (powerUp.position.y > SCREEN_HEIGHT)
+        {
+            powerUp.isActive = false;
+        }
+    }
 }
 
 void DrawGame()
@@ -155,6 +183,12 @@ void DrawGame()
         {
             DrawRectangleRec(bricks[i].rect, GREEN);
         }
+    }
+
+    // Draw power-up
+    if (powerUp.isActive)
+    {
+        DrawPowerUp();
     }
 
     // Draw UI (score, lives)
@@ -185,6 +219,14 @@ void ResetBricks()
     }
 }
 
+void ResetPowerUp()
+{
+    // Randomly spawn the power-up
+    powerUp.position = (Vector2){rand() % (SCREEN_WIDTH - 20), -20};  // Start offscreen
+    powerUp.isActive = true;
+    powerUp.speed = 2.0f;  // Fall speed of the power-up
+}
+
 void CheckCollisions()
 {
     for (int i = 0; i < NUM_ROWS * BRICKS_PER_ROW; i++)
@@ -210,10 +252,16 @@ void RestartGame()
     gameOver = false;
     ResetBall();
     ResetBricks();
+    ResetPowerUp();
 }
 
 void DrawUI()
 {
     DrawText(TextFormat("Lives: %d", lives), 10, 10, 20, WHITE);
     DrawText(TextFormat("Score: %d", score), SCREEN_WIDTH - 150, 10, 20, WHITE);
+}
+
+void DrawPowerUp()
+{
+    DrawRectangleV(powerUp.position, (Vector2){20, 20}, YELLOW);  // Draw the power-up as a yellow square
 }

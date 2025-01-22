@@ -35,10 +35,10 @@ typedef struct Brick {
 typedef struct PowerUp {
     Vector2 position;
     bool isActive;
-    float speed;  // Power-up fall speed
+    float speed;
 } PowerUp;
 
-// Game variables
+//Variables
 Ball ball;
 Paddle paddle;
 Brick bricks[NUM_ROWS * BRICKS_PER_ROW];
@@ -47,7 +47,7 @@ int lives = MAX_LIVES;
 int score = 0;
 bool gameOver = false;
 
-// Function prototypes
+// Functions
 void InitializeGame();
 void UpdateGame();
 void DrawGame();
@@ -72,7 +72,7 @@ int main(void)
     {
         if (gameOver)
         {
-            // Handle restart
+            //Restart
             if (IsKeyPressed(KEY_R))
             {
                 RestartGame();
@@ -110,7 +110,7 @@ void UpdateGame()
     if (IsKeyDown(KEY_LEFT) && paddle.position.x > 0)
         paddle.position = Vector2Add(paddle.position, (Vector2){-8.0f, 0});  // Move left
 
-    // Update ball position using raymath
+    // Update ball position
     ball.position = Vector2Add(ball.position, ball.speed);
 
     // Ball-wall collision (left, right, top walls)
@@ -145,19 +145,19 @@ void UpdateGame()
     // Ball-brick collision
     CheckCollisions();
 
-    // Power-up movement
+    // Powerup movement
     if (powerUp.isActive)
     {
-        powerUp.position.y += powerUp.speed;  // Move power-up down
+        powerUp.position.y += powerUp.speed;  // Move powerup down
 
         // Check for ball-powerup collision
         if (CheckCollisionCircleRec(ball.position, BALL_RADIUS, (Rectangle){powerUp.position.x, powerUp.position.y, 20, 20}))
         {
-            lives++;  // Grant extra life
-            powerUp.isActive = false;  // Deactivate power-up
+            lives++;  //Extra life
+            powerUp.isActive = false;  // Deactivate powerup
         }
 
-        // If power-up goes off the screen, deactivate it
+        // If powerup goes off the screen, deactivate it
         if (powerUp.position.y > SCREEN_HEIGHT)
         {
             powerUp.isActive = false;
@@ -222,10 +222,10 @@ void ResetBricks()
 
 void ResetPowerUp()
 {
-    // Randomly spawn the power-up
+    // Randomly spawn the powerup
     powerUp.position = (Vector2){rand() % (SCREEN_WIDTH - 20), -20};  // Start offscreen
     powerUp.isActive = true;
-    powerUp.speed = 2.0f;  // Fall speed of the power-up
+    powerUp.speed = 2.0f;  // Fall speed of the powerup
 }
 
 void CheckCollisions()
@@ -264,5 +264,5 @@ void DrawUI()
 
 void DrawPowerUp()
 {
-    DrawRectangleV(powerUp.position, (Vector2){20, 20}, YELLOW);  // Draw the power-up as a yellow square
+    DrawRectangleV(powerUp.position, (Vector2){20, 20}, YELLOW);  // Draw the powerup as a yellow square
 }
